@@ -20,14 +20,12 @@ macro_rules! my_format {
     () => ("{:15.15} {:18.18} {:25.25} {:25.25} {:10.10}")
 }
 
-macro_rules! foo {
-    ($t:expr) => {{
-        let mut iter = $t.split("\r\n");
-        let name = iter.next().unwrap();
-        let mac = iter.next().unwrap();
-        let (status, owner_ip) = iter.next().unwrap().split_at(1);
-        (name, mac, owner_ip, status)
-    }}
+fn parse(string: &str) -> Option<(&str, &str, &str, &str)> {
+    let mut iter = string.split("\r\n");
+    let name = iter.next()?;
+    let mac = iter.next()?;
+    let (status, owner_ip) = iter.next()?.split_at(1);
+    Some((name, mac, owner_ip, status))
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -51,8 +49,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         match socket.recv_from(&mut buf) {
             Ok((bytes_count, source)) => {
                 if let Ok(t) = str::from_utf8(&buf[..bytes_count]) {
-                    let (name, mac, owner_ip, status) = foo!(t);
-                    println!(my_format!(), name, mac, source.to_string(), owner_ip, status);
+                    if let Some((name, mac, owner_ip, status)) = parse(t) {
+                        println!(my_format!(), name, mac, source.to_string(), owner_ip, status);
+                    }
                 };
             }
             Err(error) => {
