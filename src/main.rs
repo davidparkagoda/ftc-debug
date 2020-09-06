@@ -48,10 +48,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     loop {
         match socket.recv_from(&mut buf) {
             Ok((bytes_count, source)) => {
-                if let Ok(t) = str::from_utf8(&buf[..bytes_count]) {
-                    if let Some((name, mac, owner_ip, status)) = parse(t) {
-                        println!(my_format!(), name, mac, source.to_string(), owner_ip, status);
-                    }
+                if let Ok((name, mac, owner_ip, status)) = str::from_utf8(&buf[..bytes_count]).map(parse) {
+                    println!(my_format!(), name, mac, source.to_string(), owner_ip, status);
                 };
             }
             Err(error) => {
