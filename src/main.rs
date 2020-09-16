@@ -16,8 +16,8 @@ struct Cli {
     timeout: u64,
 }
 
-macro_rules! my_format {
-    () => ("{:15.15} {:18.18} {:25.25} {:25.25} {:10.10}")
+macro_rules! print_table_format {
+    ($name: expr, $mac_id: expr, $addr: expr, $in_use: expr, $status: expr) => (println!("{:15.15} {:18.18} {:25.25} {:25.25} {:10.10}", $name, $mac_id, $addr, $in_use, $status))
 }
 
 fn parse(string: &str) -> Option<(&str, &str, &str, &str)> {
@@ -43,13 +43,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     socket.send_to(b"D", SocketAddr::from(([255, 255, 255, 255], args.port)))?;
     socket.set_read_timeout(Some(Duration::new(args.timeout, 0)))?;
 
-    println!(my_format!(), "Name", "MAC ID", "Address", "In Use Address", "Status");
+    print_table_format!("Name", "MAC ID", "Address", "In Use Address", "Status");
     let mut buf = [0; 256];
     loop {
         match socket.recv_from(&mut buf) {
             Ok((bytes_count, source)) => {
-                if let Ok((name, mac, owner_ip, status)) = str::from_utf8(&buf[..bytes_count]).map(parse) {
-                    println!(my_format!(), name, mac, source.to_string(), owner_ip, status);
+                if let Some((name, mac, owner_ip, status)) = str::from_utf8(&buf[..bytes_count]).ok().and_then(parse) {
+                    print_table_format!(name, mac, source.to_string(), owner_ip, status);
                 };
             }
             Err(error) => {
