@@ -7,5 +7,4 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-clap = "2.33.0"
-structopt = "0.3.5"
+pico-args = { version = "0.3.4", features = ["short-space-opt"] }

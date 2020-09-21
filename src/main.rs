@@ -1,18 +1,12 @@
-use structopt::StructOpt;
 use std::net::{SocketAddr, UdpSocket};
 use std::time::Duration;
 use std::process::exit;
 use std::io::ErrorKind;
 use std::str;
 
-#[derive(StructOpt)]
-#[structopt(rename_all = "kebab-case")]
 struct Cli {
-    #[structopt(long, short)]
     verbose: bool,
-    #[structopt(long, short, default_value = "30303")]
     port: u16,
-    #[structopt(long, short, default_value = "1")]
     timeout: u64,
 }
 
@@ -29,7 +23,12 @@ fn parse(string: &str) -> Option<(&str, &str, &str, &str)> {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let args: Cli = Cli::from_args();
+    let mut args = pico_args::Arguments::from_env();
+    let args = Cli {
+        verbose: args.contains(["-v", "--verbose"]),
+        port: args.opt_value_from_str(["-p", "--port"])?.unwrap_or(30303),
+        timeout: args.opt_value_from_str(["-t", "--timeout"])?.unwrap_or(1),
+    };
 
     if args.verbose
     {
