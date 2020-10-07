@@ -22,8 +22,25 @@ fn parse(string: &str) -> Option<(&str, &str, &str, &str)> {
     Some((name, mac, owner_ip, status))
 }
 
+pub const PARSE_HELP: &str = "";
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut args = pico_args::Arguments::from_env();
+
+    if args.contains(["-h", "--help"]) {
+        eprintln!("ftc
+
+USAGE:
+    ftc [FLAGS]
+
+FLAGS:
+    -h, --help       Prints help information
+    -v, --verbose    Prints debugging information
+    -p, --port       Port to send the broadcast packet
+    -t, --timeout    How long this program waits for responses");
+        exit(0);
+    }
+
     let args = Cli {
         verbose: args.contains(["-v", "--verbose"]),
         port: args.opt_value_from_str(["-p", "--port"])?.unwrap_or(30303),
